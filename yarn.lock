@@ -137,6 +137,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/luxon@npm:~3.4.0":
+  version: 3.4.2
+  resolution: "@types/luxon@npm:3.4.2"
+  checksum: 10c0/d835467de3daf7e17ba78b50bb5a14efd94272439ca067990d71332a54b311544459c69623eddd243b511b28d70194c9591a9ee8cf9c038962c965f991affd7e
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^22.13.0":
   version: 22.13.0
   resolution: "@types/node@npm:22.13.0"
@@ -145,6 +152,22 @@ __metadata:
   checksum: 10c0/9cf6358b2863ae7bf9588ca1cc3d87f6a6289c3880e95a046a188760666870e2c12502df8b0a473bec8aa8ffee85e025d60382a6104b10f197120793235b2c22
   languageName: node
   linkType: hard
+
+"TwiLiveBot@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "TwiLiveBot@workspace:."
+  dependencies:
+    "@telegraf/types": "npm:^8.2.0"
+    "@twurple/api": "npm:^7.2.1"
+    "@twurple/common": "npm:^7.2.1"
+    "@types/node": "npm:^22.13.0"
+    axios: "npm:^1.7.9"
+    cron: "npm:^3.5.0"
+    dotenv: "npm:^16.4.7"
+    telegraf: "npm:^4.16.3"
+    typescript: "npm:^5.5.3"
+  languageName: unknown
+  linkType: soft
 
 "abort-controller@npm:^3.0.0":
   version: 3.0.0
@@ -206,6 +229,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cron@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "cron@npm:3.5.0"
+  dependencies:
+    "@types/luxon": "npm:~3.4.0"
+    luxon: "npm:~3.5.0"
+  checksum: 10c0/ca5fbfb0d54a77ff4a293ad7bd0e67872915985d739fa4b72ecfaae72db1918f542469a1a6638af4c5a280753443ba308dd04382fe8dcc07d29bd7922856ea94
+  languageName: node
+  linkType: hard
+
 "debug@npm:^4.3.4":
   version: 4.4.0
   resolution: "debug@npm:4.4.0"
@@ -264,6 +297,13 @@ __metadata:
   version: 2.0.6
   resolution: "klona@npm:2.0.6"
   checksum: 10c0/94eed2c6c2ce99f409df9186a96340558897b3e62a85afdc1ee39103954d2ebe1c1c4e9fe2b0952771771fa96d70055ede8b27962a7021406374fdb695fd4d01
+  languageName: node
+  linkType: hard
+
+"luxon@npm:~3.5.0":
+  version: 3.5.0
+  resolution: "luxon@npm:3.5.0"
+  checksum: 10c0/335789bba95077db831ef99894edadeb23023b3eb2137a1b56acd0d290082b691cf793143d69e30bc069ec95f0b49f36419f48e951c68014f19ffe12045e3494
   languageName: node
   linkType: hard
 
@@ -347,21 +387,6 @@ __metadata:
   checksum: 10c0/30c779dd32b63cf489cb0a1f28828977db51fe7ca1673ae143649ab583645f6ddb61acb28e770abe52f9006c230cbcc026e56d214964c7bfd788ae05d684643a
   languageName: node
   linkType: hard
-
-"stream-sync-bot@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "stream-sync-bot@workspace:."
-  dependencies:
-    "@telegraf/types": "npm:^8.2.0"
-    "@twurple/api": "npm:^7.2.1"
-    "@twurple/common": "npm:^7.2.1"
-    "@types/node": "npm:^22.13.0"
-    axios: "npm:^1.7.9"
-    dotenv: "npm:^16.4.7"
-    telegraf: "npm:^4.16.3"
-    typescript: "npm:^5.5.3"
-  languageName: unknown
-  linkType: soft
 
 "telegraf@npm:^4.16.3":
   version: 4.16.3
