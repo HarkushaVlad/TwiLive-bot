@@ -9,7 +9,7 @@ function formatStreamDuration(startedAt: Date): string {
     const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
 
-    return `${hours}:${minutes}:${seconds < 10 ? `0${seconds}` : ''}`;
+    return `${hours}:${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }
 
 function getMessage(streamData: any, streamerUsername: string): string {
@@ -27,14 +27,14 @@ function getMessage(streamData: any, streamerUsername: string): string {
     `;
 }
 
-export async function sendStreamPost(channelId: number, streamerUsername: string): Promise<void> {
+export async function sendStreamPost(channelId: number, streamerUsername: string): Promise<number> {
     try {
         const streamData = await getStreamData(streamerUsername);
         if (!streamData) throw new Error('No stream data');
 
         const gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
 
-        await bot.telegram.sendAnimation(
+        const message = await bot.telegram.sendAnimation(
             channelId,
             {source: gifPath},
             {
@@ -43,6 +43,9 @@ export async function sendStreamPost(channelId: number, streamerUsername: string
             }
         );
 
+        consoleLogger.info('Post sent successfully');
+        
+        return message.message_id;
     } catch (error) {
         consoleLogger.error(`Error creating post: ${error}`);
         throw error;
@@ -66,5 +69,14 @@ export async function updateStreamPost(chatId: number, messageId: number, stream
         consoleLogger.info('Post updated successfully');
     } catch (error) {
         consoleLogger.error(`Error updating post: ${error}`);
+    }
+}
+
+export async function deleteStreamPost(chatId: number, messageId: number) {
+    try {
+        await bot.telegram.deleteMessage(chatId, messageId);
+        consoleLogger.info('Post deleted successfully');
+    } catch (error) {
+        consoleLogger.error(`Delete post error: ${error}`);
     }
 }

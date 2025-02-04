@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import {consoleLogger} from "../core/logger";
 
 dotenv.config();
 
@@ -26,7 +27,8 @@ const loadConfig = (): BotConfig => {
 
     for (const varName of requiredVariables) {
         if (!process.env[varName]) {
-            throw new Error(`Missing required environment variable: ${varName}`);
+            consoleLogger.error(`Missing required environment variable: ${varName}`);
+            process.exit(1);
         }
     }
 
