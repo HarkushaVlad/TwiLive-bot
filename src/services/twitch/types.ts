@@ -7,6 +7,6 @@ interface TwitchAPIOAuthResponse {
 interface StreamData {
     title: string;
     category: string;
-    startedAt: number;
+    startedAt: Date;
     viewerCount: number;
 }

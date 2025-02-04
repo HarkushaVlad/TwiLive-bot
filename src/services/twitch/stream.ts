@@ -14,7 +14,7 @@ export async function getStreamData(streamerUsername: string): Promise<StreamDat
         return {
             title,
             category,
-            startedAt: Number(started_at),
+            startedAt: new Date(started_at),
             viewerCount,
         };
     } catch (error) {
