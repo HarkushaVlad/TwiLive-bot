@@ -3,3 +3,10 @@ interface TwitchAPIOAuthResponse {
     expires_in: number;
     token_type: string;
 }
+
+interface StreamData {
+    title: string;
+    category: string;
+    startedAt: number;
+    viewerCount: number;
+}
