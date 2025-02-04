@@ -31,11 +31,11 @@ async function authenticate(): Promise<void> {
     }
 }
 
-export async function getStreamInfo(userLogin: string): Promise<HelixStreamData | null> {
+export async function getStreamInfo(streamerUsername: string): Promise<HelixStreamData | null> {
     await authenticate();
 
     try {
-        const url = `https://api.twitch.tv/helix/streams?user_login=${userLogin}`;
+        const url = `https://api.twitch.tv/helix/streams?user_login=${streamerUsername}`;
         const response = await axios.get(url, {
             headers: {
                 'Client-ID': botConfig.TWITCH_CLIENT_ID,
