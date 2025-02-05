@@ -36,6 +36,21 @@ jobs:
             git clean -fd 
           fi
 
+          cat > .env <<EOL
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID=${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TWITCH_CLIENT_ID=${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET=${{ secrets.TWITCH_CLIENT_SECRET }}
+          STREAMER_USERNAME=${{ secrets.STREAMER_USERNAME }}
+          SEGMENT_DURATION=${{ secrets.SEGMENT_DURATION }}
+          FPS=${{ secrets.FPS }}
+          SCALE_WIDTH=${{ secrets.SCALE_WIDTH }}
+          POSTGRES_URL=${{ secrets.POSTGRES_URL }}
+          POSTGRES_DATABASE=${{ secrets.POSTGRES_DATABASE }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          EOL
+          
           docker-compose down --remove-orphans
           docker-compose up -d --build
           EOF

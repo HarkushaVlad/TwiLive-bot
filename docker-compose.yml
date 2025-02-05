@@ -37,8 +37,6 @@ services:
   app:
     build: .
     container_name: twilive_bot
-    env_file:
-      - /etc/twilive-bot/.env
     depends_on:
       postgres:
         condition: service_healthy
