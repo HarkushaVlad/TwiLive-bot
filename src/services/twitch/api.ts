@@ -1,4 +1,4 @@
-import {consoleLogger} from "../../core/logger";
+import {logger} from "../../logger/logger";
 import {botConfig} from "../../config/config";
 import {HelixStreamData} from "@twurple/api/lib/interfaces/endpoints/stream.external";
 import axios from "axios";
@@ -24,9 +24,9 @@ async function authenticate(): Promise<void> {
         accessToken = data.access_token;
         tokenExpiration = currentTime + data.expires_in * 1000 - 60000;
 
-        consoleLogger.info('Twitch API authentication is successful.');
+        logger.info('Twitch API authentication is successful.');
     } catch (error) {
-        consoleLogger.error(`Twitch API authentication error: ${error}`);
+        logger.error(`Twitch API authentication error: ${error}`);
         throw error;
     }
 }
@@ -55,7 +55,7 @@ export async function getStreamInfo(streamerUsername: string): Promise<HelixStre
 
         return null;
     } catch (error) {
-        consoleLogger.error(`Failed to get stream info: ${error}`);
+        logger.error(`Failed to get stream info: ${error}`);
         throw error;
     }
 }

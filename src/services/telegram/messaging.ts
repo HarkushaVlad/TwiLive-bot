@@ -1,6 +1,6 @@
 import {getStreamData} from "../twitch/stream";
 import {captureStreamSegmentUsingStreamlink} from "../ffmpeg/capturing";
-import {consoleLogger} from "../../core/logger";
+import {logger} from "../../logger/logger";
 import {bot} from "./bot";
 
 function formatStreamDuration(startedAt: Date): string {
@@ -43,11 +43,11 @@ export async function sendStreamPost(channelId: number, streamerUsername: string
             }
         );
 
-        consoleLogger.info('Post sent successfully');
+        logger.info('Post sent successfully');
         
         return message.message_id;
     } catch (error) {
-        consoleLogger.error(`Error creating post: ${error}`);
+        logger.error(`Error creating post: ${error}`);
         throw error;
     }
 }
@@ -66,17 +66,17 @@ export async function updateStreamPost(chatId: number, messageId: number, stream
             parse_mode: 'HTML'
         });
 
-        consoleLogger.info('Post updated successfully');
+        logger.info('Post updated successfully');
     } catch (error) {
-        consoleLogger.error(`Error updating post: ${error}`);
+        logger.error(`Error updating post: ${error}`);
     }
 }
 
 export async function deleteStreamPost(chatId: number, messageId: number) {
     try {
         await bot.telegram.deleteMessage(chatId, messageId);
-        consoleLogger.info('Post deleted successfully');
+        logger.info('Post deleted successfully');
     } catch (error) {
-        consoleLogger.error(`Delete post error: ${error}`);
+        logger.error(`Delete post error: ${error}`);
     }
 }

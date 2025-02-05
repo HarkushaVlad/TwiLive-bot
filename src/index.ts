@@ -1,10 +1,10 @@
 import {bot} from "./services/telegram/bot";
-import {consoleLogger} from "./core/logger";
+import {logger} from "./logger/logger";
 import {botConfig} from "./config/config";
-import {streamCheckJob} from "./core/scheduler";
+import {streamCheckJob} from "./cron/scheduler";
 
 bot.launch();
-consoleLogger.info(`🤖 Bot is launched for ${botConfig.STREAMER_USERNAME} | ${botConfig.TELEGRAM_CHANNEL_ID}`);
+logger.info(`🤖 Bot is launched for ${botConfig.STREAMER_USERNAME} | ${botConfig.TELEGRAM_CHANNEL_ID}`);
 
 streamCheckJob.start();
 

@@ -2,20 +2,26 @@ import {CronJob} from 'cron';
 import {botConfig} from "../config/config";
 import {deleteStreamPost, sendStreamPost, updateStreamPost} from "../services/telegram/messaging";
 import {getStreamData} from "../services/twitch/stream";
-import {consoleLogger} from "./logger";
-
-let currentPostId: number | null = null;
+import {logger} from "../logger/logger";
+import {deleteCurrentPostId, getCurrentPostId, saveCurrentPostId} from "../repositories/currentPostRepository";
 
 export const streamCheckJob = new CronJob(
     '0 * * * * *',
     async () => {
         try {
             const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
+            const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
 
             if (streamData && !currentPostId) {
-                currentPostId = await sendStreamPost(
+                const newPostId = await sendStreamPost(
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     botConfig.STREAMER_USERNAME
+                );
+
+                await saveCurrentPostId(
+                    botConfig.STREAMER_USERNAME,
+                    botConfig.TELEGRAM_CHANNEL_ID!,
+                    newPostId
                 );
 
                 streamUpdateJob.start();
@@ -23,7 +29,7 @@ export const streamCheckJob = new CronJob(
                 return;
             }
         } catch (error) {
-            consoleLogger.error(`Stream check error: ${error}`);
+            logger.error(`Stream check error: ${error}`);
         }
     },
     null,
@@ -34,6 +40,8 @@ export const streamCheckJob = new CronJob(
 const streamUpdateJob = new CronJob(
     '0 */3 * * * *',
     async () => {
+        const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
+
         if (!currentPostId) return;
 
         const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
@@ -44,7 +52,8 @@ const streamUpdateJob = new CronJob(
                 currentPostId
             );
 
-            currentPostId = null;
+            await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
+
             streamCheckJob.start();
             streamUpdateJob.stop();
             return;
@@ -57,7 +66,7 @@ const streamUpdateJob = new CronJob(
                 botConfig.STREAMER_USERNAME
             );
         } catch (error) {
-            consoleLogger.error(`Post update error: ${error}`);
+            logger.error(`Post update error: ${error}`);
         }
     },
     null,
