@@ -10,8 +10,8 @@ generator client {
 
 model CurrentPost {
   streamerUsername  String @id
-  telegramChannelId BigInt
-  messageId         BigInt
+  telegramChannelId String
+  messageId         Int
 }
 
 model Log {

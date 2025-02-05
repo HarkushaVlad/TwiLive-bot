@@ -1,7 +1,5 @@
 import Transport from 'winston-transport';
-import {PrismaClient} from '@prisma/client';
-
-const prisma = new PrismaClient();
+import {prisma} from "../repositories/currentPostRepository";
 
 interface LogInfo {
     level: string;

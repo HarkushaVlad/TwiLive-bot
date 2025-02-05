@@ -13,6 +13,8 @@ export const streamCheckJob = new CronJob(
             const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
 
             if (streamData && !currentPostId) {
+                logger.info(`${botConfig.STREAMER_USERNAME} started stream`)
+
                 const newPostId = await sendStreamPost(
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     botConfig.STREAMER_USERNAME
@@ -24,8 +26,13 @@ export const streamCheckJob = new CronJob(
                     newPostId
                 );
 
-                streamUpdateJob.start();
+
                 streamCheckJob.stop();
+                logger.info("Cron checking job stopped");
+
+                streamUpdateJob.start();
+                logger.info("Cron updating job started");
+
                 return;
             }
         } catch (error) {
@@ -47,6 +54,8 @@ const streamUpdateJob = new CronJob(
         const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
 
         if (!streamData && currentPostId) {
+            logger.info(`${botConfig.STREAMER_USERNAME} finished stream`)
+
             await deleteStreamPost(
                 botConfig.TELEGRAM_CHANNEL_ID!,
                 currentPostId
@@ -54,8 +63,13 @@ const streamUpdateJob = new CronJob(
 
             await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
 
-            streamCheckJob.start();
+
             streamUpdateJob.stop();
+            logger.info("Cron updating job stopped");
+
+            streamCheckJob.start();
+            logger.info("Cron checking job started");
+
             return;
         }
 

@@ -12,7 +12,7 @@ export async function captureStreamSegmentUsingStreamlink(streamerUsername: stri
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, {recursive: true});
         }
-        
+
         const segmentDuration = botConfig.SEGMENT_DURATION || 5;
         const fps = botConfig.FPS || 10;
         const scaleWidth = botConfig.SCALE_WIDTH || 420;

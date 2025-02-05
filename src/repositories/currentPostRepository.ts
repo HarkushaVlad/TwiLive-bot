@@ -1,18 +1,19 @@
-import {PrismaClient} from '@prisma/client';
+import {PrismaClient} from "@prisma/client";
 
-const prisma = new PrismaClient();
+
+export const prisma = new PrismaClient();
 
 export async function getCurrentPostId(streamerUsername: string): Promise<number | null> {
     const record = await prisma.currentPost.findUnique({
         where: {streamerUsername}
     });
 
-    return record ? Number(record.messageId) : null;
+    return record ? record.messageId : null;
 }
 
 export async function saveCurrentPostId(
     streamerUsername: string,
-    telegramChannelId: number,
+    telegramChannelId: string,
     messageId: number
 ): Promise<void> {
     await prisma.currentPost.upsert({
@@ -26,4 +27,8 @@ export async function deleteCurrentPostId(streamerUsername: string): Promise<voi
     await prisma.currentPost.delete({
         where: {streamerUsername}
     });
+}
+
+export async function truncateCurrentPosts(): Promise<void> {
+    await prisma.currentPost.deleteMany({});
 }

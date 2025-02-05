@@ -5,7 +5,7 @@ dotenv.config();
 
 interface BotConfig {
     TELEGRAM_BOT_TOKEN: string;
-    TELEGRAM_CHANNEL_ID: number;
+    TELEGRAM_CHANNEL_ID: string;
     TWITCH_CLIENT_ID: string;
     TWITCH_CLIENT_SECRET: string;
     STREAMER_USERNAME: string;
@@ -34,7 +34,7 @@ const loadConfig = (): BotConfig => {
 
     return {
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN!,
-        TELEGRAM_CHANNEL_ID: Number(process.env.TELEGRAM_CHANNEL_ID!),
+        TELEGRAM_CHANNEL_ID: process.env.TELEGRAM_CHANNEL_ID!,
         TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID!,
         TWITCH_CLIENT_SECRET: process.env.TWITCH_CLIENT_SECRET!,
         STREAMER_USERNAME: process.env.STREAMER_USERNAME!,

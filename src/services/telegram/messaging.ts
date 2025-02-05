@@ -2,6 +2,8 @@ import {getStreamData} from "../twitch/stream";
 import {captureStreamSegmentUsingStreamlink} from "../ffmpeg/capturing";
 import {logger} from "../../logger/logger";
 import {bot} from "./bot";
+import {CurrentPost} from "@prisma/client";
+import {prisma, truncateCurrentPosts} from "../../repositories/currentPostRepository";
 
 function formatStreamDuration(startedAt: Date): string {
     const durationMs = Date.now() - startedAt.getTime();
@@ -27,7 +29,7 @@ function getMessage(streamData: any, streamerUsername: string): string {
     `;
 }
 
-export async function sendStreamPost(channelId: number, streamerUsername: string): Promise<number> {
+export async function sendStreamPost(channelId: string, streamerUsername: string): Promise<number> {
     try {
         const streamData = await getStreamData(streamerUsername);
         if (!streamData) throw new Error('No stream data');
@@ -44,7 +46,7 @@ export async function sendStreamPost(channelId: number, streamerUsername: string
         );
 
         logger.info('Post sent successfully');
-        
+
         return message.message_id;
     } catch (error) {
         logger.error(`Error creating post: ${error}`);
@@ -52,7 +54,7 @@ export async function sendStreamPost(channelId: number, streamerUsername: string
     }
 }
 
-export async function updateStreamPost(chatId: number, messageId: number, streamerUsername: string) {
+export async function updateStreamPost(chatId: string, messageId: number, streamerUsername: string) {
     try {
         const streamData = await getStreamData(streamerUsername);
         if (!streamData) return;
@@ -72,11 +74,31 @@ export async function updateStreamPost(chatId: number, messageId: number, stream
     }
 }
 
-export async function deleteStreamPost(chatId: number, messageId: number) {
+export async function deleteStreamPost(chatId: string, messageId: number) {
     try {
         await bot.telegram.deleteMessage(chatId, messageId);
         logger.info('Post deleted successfully');
     } catch (error) {
         logger.error(`Delete post error: ${error}`);
     }
+}
+
+export async function deleteAllPosts() {
+    const posts = await prisma.currentPost.findMany();
+
+    try {
+        const deletePromises = posts.map(post =>
+            bot.telegram.deleteMessage(post.telegramChannelId, post.messageId)
+        );
+
+        await Promise.all(deletePromises);
+
+        logger.info('All posts were deleted successfully');
+    } catch (error) {
+        logger.error(`Error deleting post: ${error}`);
+    }
+
+    await truncateCurrentPosts();
+
+    logger.info('Current posts table was truncated');
 }
