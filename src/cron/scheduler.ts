@@ -9,34 +9,35 @@ export const streamCheckJob = new CronJob(
     '0 * * * * *',
     async () => {
         try {
+            logger.info("Checking stream status...");
+
             const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
             const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
 
             if (streamData && !currentPostId) {
-                logger.info(`${botConfig.STREAMER_USERNAME} started stream`)
+                logger.info(`Stream started for user: ${botConfig.STREAMER_USERNAME}`);
 
                 const newPostId = await sendStreamPost(
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     botConfig.STREAMER_USERNAME
                 );
+                logger.info(`Stream post sent successfully. Message ID: ${newPostId}`);
 
                 await saveCurrentPostId(
                     botConfig.STREAMER_USERNAME,
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     newPostId
                 );
-
+                logger.info(`Stream post record saved for user: ${botConfig.STREAMER_USERNAME}`);
 
                 streamCheckJob.stop();
-                logger.info("Cron checking job stopped");
+                logger.info("Stream checking job stopped.");
 
                 streamUpdateJob.start();
-                logger.info("Cron updating job started");
-
-                return;
+                logger.info("Stream update job started.");
             }
         } catch (error) {
-            logger.error(`Stream check error: ${error}`);
+            logger.error(`Error during stream check: ${error}`);
         }
     },
     null,
@@ -47,40 +48,48 @@ export const streamCheckJob = new CronJob(
 const streamUpdateJob = new CronJob(
     '0 */3 * * * *',
     async () => {
-        const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
-
-        if (!currentPostId) return;
-
-        const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
-
-        if (!streamData && currentPostId) {
-            logger.info(`${botConfig.STREAMER_USERNAME} finished stream`)
-
-            await deleteStreamPost(
-                botConfig.TELEGRAM_CHANNEL_ID!,
-                currentPostId
-            );
-
-            await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
-
-
-            streamUpdateJob.stop();
-            logger.info("Cron updating job stopped");
-
-            streamCheckJob.start();
-            logger.info("Cron checking job started");
-
-            return;
-        }
-
         try {
+            logger.info("Updating stream post...");
+
+            const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
+
+            if (!currentPostId) {
+                logger.warn(`No active stream post found for user: ${botConfig.STREAMER_USERNAME}`);
+                return;
+            }
+
+            const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
+
+            if (!streamData) {
+                logger.info(`Stream ended for user: ${botConfig.STREAMER_USERNAME}`);
+
+                await deleteStreamPost(
+                    botConfig.TELEGRAM_CHANNEL_ID!,
+                    currentPostId
+                );
+                logger.info(`Stream post deleted. Message ID: ${currentPostId}`);
+
+                await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
+                logger.info(`Stream post record removed for user: ${botConfig.STREAMER_USERNAME}`);
+
+                streamUpdateJob.stop();
+                logger.info("Stream update job stopped.");
+
+                streamCheckJob.start();
+                logger.info("Stream checking job restarted.");
+
+                return;
+            }
+
             await updateStreamPost(
                 botConfig.TELEGRAM_CHANNEL_ID!,
                 currentPostId,
                 botConfig.STREAMER_USERNAME
             );
+            logger.info(`Stream post updated. Message ID: ${currentPostId}`);
+
         } catch (error) {
-            logger.error(`Post update error: ${error}`);
+            logger.error(`Error updating stream post: ${error}`);
         }
     },
     null,

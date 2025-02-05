@@ -11,6 +11,7 @@ export async function captureStreamSegmentUsingStreamlink(streamerUsername: stri
 
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, {recursive: true});
+            logger.info(`Created directory for temporary storage: ${outputDir}`);
         }
 
         const segmentDuration = botConfig.SEGMENT_DURATION || 5;
@@ -19,14 +20,19 @@ export async function captureStreamSegmentUsingStreamlink(streamerUsername: stri
 
         const command = `streamlink twitch.tv/${streamerUsername} best --stdout --twitch-disable-ads | ffmpeg -y -i - -t ${segmentDuration} -vf "fps=${fps},scale=${scaleWidth}:-1:flags=lanczos" ${outputFile}`;
 
-        logger.info(`Executing command: ${command}`);
+        logger.debug(`Executing capture command`);
 
         exec(command, (error, stdout, stderr) => {
             if (error) {
-                logger.error(`Error executing command: ${error.message}`);
+                logger.error(`Failed to execute capture command: ${error.message}`);
                 return reject(error);
             }
-            logger.info('Stream segment captured and converted to GIF successfully.');
+
+            if (stderr) {
+                logger.warn(`FFmpeg warning: ${stderr}`);
+            }
+
+            logger.info(`Stream segment captured successfully: ${outputFile}`);
             resolve(outputFile);
         });
     });

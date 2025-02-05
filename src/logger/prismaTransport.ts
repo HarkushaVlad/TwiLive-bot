@@ -23,7 +23,7 @@ export class PrismaTransport extends Transport {
                 message: info.message,
             },
         }).catch((error: any) => {
-            console.error("Error writing log to database:", error);
+            console.error(`Failed to save log to database. Error: ${error.message}`);
         }).finally(() => {
             callback();
         });

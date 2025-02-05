@@ -1,14 +1,25 @@
 import {PrismaClient} from "@prisma/client";
-
+import {logger} from "../logger/logger";
 
 export const prisma = new PrismaClient();
 
 export async function getCurrentPostId(streamerUsername: string): Promise<number | null> {
-    const record = await prisma.currentPost.findUnique({
-        where: {streamerUsername}
-    });
+    try {
+        const record = await prisma.currentPost.findUnique({
+            where: {streamerUsername}
+        });
 
-    return record ? record.messageId : null;
+        if (record) {
+            logger.debug(`Retrieved current post ID: ${record.messageId} for streamer: ${streamerUsername}`);
+        } else {
+            logger.debug(`No current post found for streamer: ${streamerUsername}`);
+        }
+
+        return record ? record.messageId : null;
+    } catch (error) {
+        logger.error(`Error retrieving current post ID for streamer ${streamerUsername}: ${error}`);
+        return null;
+    }
 }
 
 export async function saveCurrentPostId(
@@ -16,19 +27,34 @@ export async function saveCurrentPostId(
     telegramChannelId: string,
     messageId: number
 ): Promise<void> {
-    await prisma.currentPost.upsert({
-        where: {streamerUsername},
-        update: {messageId, telegramChannelId},
-        create: {streamerUsername, telegramChannelId, messageId}
-    });
+    try {
+        await prisma.currentPost.upsert({
+            where: {streamerUsername},
+            update: {messageId, telegramChannelId},
+            create: {streamerUsername, telegramChannelId, messageId}
+        });
+        logger.info(`Saved current post ID: ${messageId} for streamer: ${streamerUsername}`);
+    } catch (error) {
+        logger.error(`Error saving current post ID for streamer ${streamerUsername}: ${error}`);
+    }
 }
 
 export async function deleteCurrentPostId(streamerUsername: string): Promise<void> {
-    await prisma.currentPost.delete({
-        where: {streamerUsername}
-    });
+    try {
+        await prisma.currentPost.delete({
+            where: {streamerUsername}
+        });
+        logger.info(`Deleted current post for streamer: ${streamerUsername}`);
+    } catch (error) {
+        logger.warn(`No post found to delete for streamer: ${streamerUsername}`);
+    }
 }
 
 export async function truncateCurrentPosts(): Promise<void> {
-    await prisma.currentPost.deleteMany({});
+    try {
+        await prisma.currentPost.deleteMany({});
+        logger.info("All current post records have been cleared.");
+    } catch (error) {
+        logger.error(`Error clearing current post records: ${error}`);
+    }
 }

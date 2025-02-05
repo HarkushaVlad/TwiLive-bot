@@ -2,7 +2,6 @@ import {getStreamData} from "../twitch/stream";
 import {captureStreamSegmentUsingStreamlink} from "../ffmpeg/capturing";
 import {logger} from "../../logger/logger";
 import {bot} from "./bot";
-import {CurrentPost} from "@prisma/client";
 import {prisma, truncateCurrentPosts} from "../../repositories/currentPostRepository";
 
 function formatStreamDuration(startedAt: Date): string {
@@ -31,11 +30,18 @@ function getMessage(streamData: any, streamerUsername: string): string {
 
 export async function sendStreamPost(channelId: string, streamerUsername: string): Promise<number> {
     try {
+        logger.info(`Fetching stream data for ${streamerUsername}...`);
         const streamData = await getStreamData(streamerUsername);
-        if (!streamData) throw new Error('No stream data');
 
+        if (!streamData) {
+            logger.warn(`No stream data available for ${streamerUsername}. Skipping post creation.`);
+            return -1; // Returning a specific value indicating failure to fetch stream data
+        }
+
+        logger.info(`Capturing stream segment for ${streamerUsername}...`);
         const gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
 
+        logger.info(`Sending stream post to channel ${channelId}...`);
         const message = await bot.telegram.sendAnimation(
             channelId,
             {source: gifPath},
@@ -45,22 +51,32 @@ export async function sendStreamPost(channelId: string, streamerUsername: string
             }
         );
 
-        logger.info('Post sent successfully');
-
+        logger.info(`Stream post sent successfully. Message ID: ${message.message_id}`);
         return message.message_id;
-    } catch (error) {
-        logger.error(`Error creating post: ${error}`);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            logger.error(`Failed to send stream post for ${streamerUsername}: ${error.message}`);
+        } else {
+            logger.error(`Failed to send stream post for ${streamerUsername}: Unknown error`);
+        }
         throw error;
     }
 }
 
 export async function updateStreamPost(chatId: string, messageId: number, streamerUsername: string) {
     try {
+        logger.info(`Fetching updated stream data for ${streamerUsername}...`);
         const streamData = await getStreamData(streamerUsername);
-        if (!streamData) return;
 
+        if (!streamData) {
+            logger.warn(`Stream for ${streamerUsername} is no longer live.`);
+            return;
+        }
+
+        logger.info(`Capturing new stream segment for ${streamerUsername}...`);
         const gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
 
+        logger.info(`Updating stream post (ID: ${messageId}) in chat ${chatId}...`);
         await bot.telegram.editMessageMedia(chatId, messageId, undefined, {
             type: 'animation',
             media: {source: gifPath},
@@ -68,37 +84,56 @@ export async function updateStreamPost(chatId: string, messageId: number, stream
             parse_mode: 'HTML'
         });
 
-        logger.info('Post updated successfully');
-    } catch (error) {
-        logger.error(`Error updating post: ${error}`);
+        logger.info(`Stream post (ID: ${messageId}) updated successfully.`);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            logger.error(`Failed to update stream post for ${streamerUsername}: ${error.message}`);
+        } else {
+            logger.error(`Failed to update stream post for ${streamerUsername}: Unknown error`);
+        }
     }
 }
 
 export async function deleteStreamPost(chatId: string, messageId: number) {
     try {
+        logger.info(`Deleting stream post (ID: ${messageId}) from chat ${chatId}...`);
         await bot.telegram.deleteMessage(chatId, messageId);
-        logger.info('Post deleted successfully');
-    } catch (error) {
-        logger.error(`Delete post error: ${error}`);
+        logger.info(`Stream post (ID: ${messageId}) deleted successfully.`);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            logger.error(`Failed to delete stream post (ID: ${messageId}): ${error.message}`);
+        } else {
+            logger.error(`Failed to delete stream post (ID: ${messageId}): Unknown error`);
+        }
     }
 }
 
 export async function deleteAllPosts() {
-    const posts = await prisma.currentPost.findMany();
-
     try {
+        logger.info("Fetching all posts for deletion...");
+        const posts = await prisma.currentPost.findMany();
+
+        if (posts.length === 0) {
+            logger.info("No posts found for deletion.");
+            return;
+        }
+
+        logger.info(`Deleting ${posts.length} posts...`);
         const deletePromises = posts.map(post =>
             bot.telegram.deleteMessage(post.telegramChannelId, post.messageId)
         );
 
         await Promise.all(deletePromises);
+        logger.info(`All posts deleted successfully.`);
 
-        logger.info('All posts were deleted successfully');
-    } catch (error) {
-        logger.error(`Error deleting post: ${error}`);
+        logger.info("Truncating current posts table...");
+        await truncateCurrentPosts();
+        logger.info("Current posts table truncated successfully.");
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            logger.error(`Failed to delete posts: ${error.message}`);
+        } else {
+            logger.error(`Failed to delete posts: Unknown error`);
+        }
     }
-
-    await truncateCurrentPosts();
-
-    logger.info('Current posts table was truncated');
 }

@@ -6,10 +6,12 @@ import axios from "axios";
 let accessToken: string | null = null;
 let tokenExpiration: number = 0;
 
-async function authenticate(): Promise<void> {
+async function authenticate(): Promise<boolean> {
     const currentTime = Date.now();
+
+    // If the access token is valid, we don't need to refresh it
     if (accessToken && currentTime < tokenExpiration) {
-        return;
+        return true;
     }
 
     try {
@@ -17,24 +19,30 @@ async function authenticate(): Promise<void> {
         const response = await axios.post(url);
 
         if (response.statusText !== 'OK') {
-            throw new Error(`Twitch authentication failed: ${response.statusText}`);
+            logger.error(`Twitch authentication failed: ${response.statusText}`);
+            return false;
         }
 
-        const data: TwitchAPIOAuthResponse = await response.data;
+        const data: TwitchAPIOAuthResponse = response.data;
         accessToken = data.access_token;
         tokenExpiration = currentTime + data.expires_in * 1000 - 60000;
 
         logger.info('Twitch API authentication is successful.');
+        return true;
     } catch (error) {
-        logger.error(`Twitch API authentication error: ${error}`);
-        throw error;
+        logger.error(`Twitch API authentication error: ${error instanceof Error ? error.message : error}`);
+        return false;
     }
 }
 
 export async function getStreamInfo(streamerUsername: string): Promise<HelixStreamData | null> {
-    await authenticate();
-
     try {
+        const isAuthenticated = await authenticate();
+        if (!isAuthenticated) {
+            logger.error('Authentication failed, cannot fetch stream info.');
+            return null;
+        }
+
         const url = `https://api.twitch.tv/helix/streams?user_login=${streamerUsername}`;
         const response = await axios.get(url, {
             headers: {
@@ -44,10 +52,11 @@ export async function getStreamInfo(streamerUsername: string): Promise<HelixStre
         });
 
         if (response.statusText !== 'OK') {
-            throw new Error(`Failed to fetch stream info: ${response.statusText}`);
+            logger.error(`Failed to fetch stream info: ${response.statusText}`);
+            return null;
         }
 
-        const data: HelixStreamData[] = await response.data.data;
+        const data: HelixStreamData[] = response.data.data;
 
         if (data && data.length > 0) {
             return data[0];
@@ -55,7 +64,7 @@ export async function getStreamInfo(streamerUsername: string): Promise<HelixStre
 
         return null;
     } catch (error) {
-        logger.error(`Failed to get stream info: ${error}`);
-        throw error;
+        logger.error(`Failed to get stream info for ${streamerUsername}: ${error instanceof Error ? error.message : error}`);
+        return null;
     }
 }

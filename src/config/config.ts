@@ -25,12 +25,16 @@ const loadConfig = (): BotConfig => {
         'SCALE_WIDTH'
     ];
 
+    logger.info("Loading environment variables for bot configuration...");
+
     for (const varName of requiredVariables) {
         if (!process.env[varName]) {
-            logger.error(`Missing required environment variable ${varName}`);
+            logger.error(`Missing required environment variable: ${varName}. Application will exit.`);
             process.exit(1);
         }
     }
+
+    logger.info("All required environment variables are present.");
 
     return {
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN!,
