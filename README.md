@@ -30,7 +30,7 @@ This bot is designed for self-hosting using Docker Compose. Follow these steps t
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/twilive-bot.git
+git clone https://github.com/HarkushaVlad/TwiLive-bot
 cd twilive-bot
 ```
 
