@@ -21,7 +21,6 @@ services:
 
   prisma:
     image: node:20-alpine
-    restart: always
     container_name: prisma-deploy
     working_dir: /usr/src/app
     volumes:
