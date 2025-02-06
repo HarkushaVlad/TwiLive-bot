@@ -31,7 +31,7 @@ This bot is designed for self-hosting using Docker Compose. Follow these steps t
 
 ```bash
 git clone https://github.com/HarkushaVlad/TwiLive-bot
-cd twilive-bot
+cd TwiLive-bot
 ```
 
 ### Step 2: Configure Environment Variables
