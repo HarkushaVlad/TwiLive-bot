@@ -53,7 +53,7 @@ export async function deleteCurrentPostId(streamerUsername: string): Promise<voi
 export async function truncateCurrentPosts(): Promise<void> {
     try {
         await prisma.currentPost.deleteMany({});
-        logger.info("All current post records have been cleared.");
+        logger.info("Current posts table truncated successfully.");
     } catch (error) {
         logger.error(`Error clearing current post records: ${error}`);
     }

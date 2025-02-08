@@ -35,7 +35,7 @@ export async function sendStreamPost(channelId: string, streamerUsername: string
 
         if (!streamData) {
             logger.warn(`No stream data available for ${streamerUsername}. Skipping post creation.`);
-            return -1; // Returning a specific value indicating failure to fetch stream data
+            return -1;
         }
 
         logger.info(`Capturing stream segment for ${streamerUsername}...`);
@@ -128,7 +128,6 @@ export async function deleteAllPosts() {
 
         logger.info("Truncating current posts table...");
         await truncateCurrentPosts();
-        logger.info("Current posts table truncated successfully.");
     } catch (error: unknown) {
         if (error instanceof Error) {
             logger.error(`Failed to delete posts: ${error.message}`);

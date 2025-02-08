@@ -21,14 +21,12 @@ export const streamCheckJob = new CronJob(
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     botConfig.STREAMER_USERNAME
                 );
-                logger.info(`Stream post sent successfully. Message ID: ${newPostId}`);
 
                 await saveCurrentPostId(
                     botConfig.STREAMER_USERNAME,
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     newPostId
                 );
-                logger.info(`Stream post record saved for user: ${botConfig.STREAMER_USERNAME}`);
 
                 streamCheckJob.stop();
                 logger.info("Stream checking job stopped.");
@@ -67,10 +65,8 @@ const streamUpdateJob = new CronJob(
                     botConfig.TELEGRAM_CHANNEL_ID!,
                     currentPostId
                 );
-                logger.info(`Stream post deleted. Message ID: ${currentPostId}`);
 
                 await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
-                logger.info(`Stream post record removed for user: ${botConfig.STREAMER_USERNAME}`);
 
                 streamUpdateJob.stop();
                 logger.info("Stream update job stopped.");
@@ -86,7 +82,6 @@ const streamUpdateJob = new CronJob(
                 currentPostId,
                 botConfig.STREAMER_USERNAME
             );
-            logger.info(`Stream post updated. Message ID: ${currentPostId}`);
 
         } catch (error) {
             logger.error(`Error updating stream post: ${error}`);
