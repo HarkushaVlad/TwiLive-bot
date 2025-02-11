@@ -63,14 +63,14 @@ export async function sendStreamPost(channelId: string, streamerUsername: string
     }
 }
 
-export async function updateStreamPost(chatId: string, messageId: number, streamerUsername: string) {
+export async function updateStreamPost(chatId: string, messageId: number, streamerUsername: string): Promise<boolean> {
     try {
         logger.info(`Fetching updated stream data for ${streamerUsername}...`);
         const streamData = await getStreamData(streamerUsername);
 
         if (!streamData) {
             logger.warn(`Stream for ${streamerUsername} is no longer live.`);
-            return;
+            return false;
         }
 
         logger.info(`Capturing new stream segment for ${streamerUsername}...`);
@@ -85,12 +85,17 @@ export async function updateStreamPost(chatId: string, messageId: number, stream
         });
 
         logger.info(`Stream post (ID: ${messageId}) updated successfully.`);
+        return true;
     } catch (error: unknown) {
         if (error instanceof Error) {
+
             logger.error(`Failed to update stream post for ${streamerUsername}: ${error.message}`);
+            
         } else {
             logger.error(`Failed to update stream post for ${streamerUsername}: Unknown error`);
         }
+
+        return false;
     }
 }
 

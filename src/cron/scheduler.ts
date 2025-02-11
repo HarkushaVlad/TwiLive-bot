@@ -14,19 +14,23 @@ export const streamCheckJob = new CronJob(
             const streamData = await getStreamData(botConfig.STREAMER_USERNAME);
             const currentPostId = await getCurrentPostId(botConfig.STREAMER_USERNAME);
 
-            if (streamData && !currentPostId) {
-                logger.info(`Stream started for user: ${botConfig.STREAMER_USERNAME}`);
+            if (streamData) {
+                if (currentPostId) {
+                    logger.info(`Stream is already started for user: ${botConfig.STREAMER_USERNAME}`);
+                } else {
+                    logger.info(`Stream started for user: ${botConfig.STREAMER_USERNAME}`);
 
-                const newPostId = await sendStreamPost(
-                    botConfig.TELEGRAM_CHANNEL_ID!,
-                    botConfig.STREAMER_USERNAME
-                );
+                    const newPostId = await sendStreamPost(
+                        botConfig.TELEGRAM_CHANNEL_ID!,
+                        botConfig.STREAMER_USERNAME
+                    );
 
-                await saveCurrentPostId(
-                    botConfig.STREAMER_USERNAME,
-                    botConfig.TELEGRAM_CHANNEL_ID!,
-                    newPostId
-                );
+                    await saveCurrentPostId(
+                        botConfig.STREAMER_USERNAME,
+                        botConfig.TELEGRAM_CHANNEL_ID!,
+                        newPostId
+                    );
+                }
 
                 streamCheckJob.stop();
                 logger.info("Stream checking job stopped.");
@@ -53,6 +57,12 @@ const streamUpdateJob = new CronJob(
 
             if (!currentPostId) {
                 logger.warn(`No active stream post found for user: ${botConfig.STREAMER_USERNAME}`);
+
+                streamUpdateJob.stop();
+                logger.info("Stream update job stopped.");
+
+                streamCheckJob.start();
+                logger.info("Stream checking job restarted.");
                 return;
             }
 
@@ -77,12 +87,21 @@ const streamUpdateJob = new CronJob(
                 return;
             }
 
-            await updateStreamPost(
+            const result = await updateStreamPost(
                 botConfig.TELEGRAM_CHANNEL_ID!,
                 currentPostId,
                 botConfig.STREAMER_USERNAME
             );
 
+            if (!result) {
+                await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
+                
+                streamUpdateJob.stop();
+                logger.info("Stream update job stopped.");
+
+                streamCheckJob.start();
+                logger.info("Stream checking job restarted.");
+            }
         } catch (error) {
             logger.error(`Error updating stream post: ${error}`);
         }
