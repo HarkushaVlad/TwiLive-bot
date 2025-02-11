@@ -10,7 +10,7 @@ function formatStreamDuration(startedAt: Date): string {
     const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
 
-    return `${hours}:${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+    return `${hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }
 
 function getMessage(streamData: any, streamerUsername: string): string {
