@@ -87,21 +87,11 @@ const streamUpdateJob = new CronJob(
                 return;
             }
 
-            const result = await updateStreamPost(
+            await updateStreamPost(
                 botConfig.TELEGRAM_CHANNEL_ID!,
                 currentPostId,
                 botConfig.STREAMER_USERNAME
             );
-
-            if (!result) {
-                await deleteCurrentPostId(botConfig.STREAMER_USERNAME);
-                
-                streamUpdateJob.stop();
-                logger.info("Stream update job stopped.");
-
-                streamCheckJob.start();
-                logger.info("Stream checking job restarted.");
-            }
         } catch (error) {
             logger.error(`Error updating stream post: ${error}`);
         }
