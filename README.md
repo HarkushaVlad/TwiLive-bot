@@ -73,7 +73,7 @@ SCALE_WIDTH=480
 
 # Localization
 LOCALE=en
-``
+```
 
 ### Step 3: Start the Containers
 
