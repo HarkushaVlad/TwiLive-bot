@@ -50,6 +50,7 @@ Replace the placeholder values with your own credentials.
 - **SEGMENT_DURATION**: Duration (in seconds) for the animated GIF preview.
 - **FPS**: Frames per second for the GIF.
 - **SCALE_WIDTH**: The width (in pixels) for the GIF preview.
+- **LOCALE**: Interface language for notifications ('en' for English, 'uk' for Ukrainian, defaults to 'en').
 
 #### Example `.env` File
 
@@ -69,6 +70,9 @@ STREAMER_USERNAME=your_favorite_streamer
 SEGMENT_DURATION=5
 FPS=10
 SCALE_WIDTH=480
+
+# Localization
+LOCALE=en
 ``
 
 ### Step 3: Start the Containers
@@ -90,7 +94,8 @@ docker-compose logs -f app
 ## Database Logging
 
 The bot logs events such as stream start/end, viewer count snapshots, post creation, updates, deletions, and error
-events into a SQLite database. These logs are stored in a persistent volume. SQLite was chosen for its simplicity and low resource requirements.
+events into a SQLite database. These logs are stored in a persistent volume. SQLite was chosen for its simplicity and
+low resource requirements.
 
 ---
 

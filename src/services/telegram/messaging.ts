@@ -4,6 +4,7 @@ import {logger} from "../../logger/logger";
 import {bot} from "./bot";
 import {truncateCurrentPosts} from "../../repositories/currentPostRepository";
 import {prisma} from "../../prisma/client";
+import {t} from "../../i18n";
 
 function formatStreamDuration(startedAt: Date): string {
     const durationMs = Date.now() - startedAt.getTime();
@@ -16,16 +17,16 @@ function formatStreamDuration(startedAt: Date): string {
 
 function getMessage(streamData: any, streamerUsername: string): string {
     return `
-<a href="https://www.twitch.tv/${streamerUsername}">🚨 СТРІМ ВЖЕ ЙДЕ! 🚨</a>
+<a href="https://www.twitch.tv/${streamerUsername}">${t('streamAlert.title')}</a>
 
-🎦 <b>Зараз:</b> ${streamData.category}
+🎦 <b>${t('streamAlert.nowPlaying')}:</b> ${streamData.category}
 
 <b>${streamData.title}</b>
 
-🕒 <b>Стрім триває:</b> ${formatStreamDuration(streamData.startedAt)}
-👀 <b>Глядачів:</b> ${streamData.viewerCount}
+🕒 <b>${t('streamAlert.duration')}:</b> ${formatStreamDuration(streamData.startedAt)}
+👀 <b>${t('streamAlert.viewers')}:</b> ${streamData.viewerCount}
 
-<a href="https://www.twitch.tv/${streamerUsername}">..Заходь, не вистачає саме тебе💙</a>
+<a href="https://www.twitch.tv/${streamerUsername}">${t('streamAlert.joinStream')}</a>
     `;
 }
 

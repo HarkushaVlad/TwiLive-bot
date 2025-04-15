@@ -15,6 +15,7 @@ services:
       SEGMENT_DURATION: ${SEGMENT_DURATION}
       FPS: ${FPS}
       SCALE_WIDTH: ${SCALE_WIDTH}
+      LOCALE: ${LOCALE}
     networks:
       - twilive-network
     ports:

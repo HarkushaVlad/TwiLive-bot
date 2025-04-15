@@ -45,6 +45,7 @@ jobs:
           SEGMENT_DURATION=${{ secrets.SEGMENT_DURATION }}
           FPS=${{ secrets.FPS }}
           SCALE_WIDTH=${{ secrets.SCALE_WIDTH }}
+          LOCALE=${{ secrets.LOCALE }}
           EOL
           
           docker-compose down --remove-orphans

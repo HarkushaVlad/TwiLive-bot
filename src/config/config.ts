@@ -12,6 +12,7 @@ interface BotConfig {
     SEGMENT_DURATION: number;
     FPS: number;
     SCALE_WIDTH: number;
+    LOCALE: string;
 }
 
 const loadConfig = (): BotConfig => {
@@ -44,7 +45,8 @@ const loadConfig = (): BotConfig => {
         STREAMER_USERNAME: process.env.STREAMER_USERNAME!,
         SEGMENT_DURATION: Number(process.env.SEGMENT_DURATION!),
         FPS: Number(process.env.FPS!),
-        SCALE_WIDTH: Number(process.env.SCALE_WIDTH!)
+        SCALE_WIDTH: Number(process.env.SCALE_WIDTH!),
+        LOCALE: process.env.LOCALE || 'en'
     };
 };
 
