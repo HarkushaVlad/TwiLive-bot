@@ -1,6 +1,7 @@
 /tmp
 /out-tsc
 src/storage/tmp/*
+/data
 .env
 
 /node_modules
