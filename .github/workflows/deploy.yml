@@ -45,10 +45,6 @@ jobs:
           SEGMENT_DURATION=${{ secrets.SEGMENT_DURATION }}
           FPS=${{ secrets.FPS }}
           SCALE_WIDTH=${{ secrets.SCALE_WIDTH }}
-          POSTGRES_URL=${{ secrets.POSTGRES_URL }}
-          POSTGRES_DATABASE=${{ secrets.POSTGRES_DATABASE }}
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           EOL
           
           docker-compose down --remove-orphans

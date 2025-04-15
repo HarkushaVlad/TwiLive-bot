@@ -13,9 +13,10 @@ RUN yarn install
 COPY . .
 
 RUN yarn prisma generate
+RUN mkdir -p /app/data
 
 RUN yarn build
 
 EXPOSE 3042
 
-CMD ["yarn", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && yarn start"]

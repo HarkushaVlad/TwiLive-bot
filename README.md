@@ -12,7 +12,7 @@ goes live.
     - Direct Twitch links
 - **Animated Preview**: Captures and attaches a 3-second(configurable) GIF preview from the live stream.
 - **Auto Cleanup**: Deletes the post once the stream ends.
-- **Database Logging**: Logs all events (stream start/end, updates, errors) to a PostgreSQL database.
+- **Database Logging**: Logs all events (stream start/end, updates, errors) to a SQLite database.
 
 ## Self-Hosted Deployment
 
@@ -50,9 +50,6 @@ Replace the placeholder values with your own credentials.
 - **SEGMENT_DURATION**: Duration (in seconds) for the animated GIF preview.
 - **FPS**: Frames per second for the GIF.
 - **SCALE_WIDTH**: The width (in pixels) for the GIF preview.
-- **POSTGRES_URL**: Connection string for PostgreSQL (format:
-  `postgresql://user:password@postgres:5432/dbname?schema=public`).
-- **POSTGRES_DATABASE**, **POSTGRES_USER**, **POSTGRES_PASSWORD**: Additional PostgreSQL credentials.
 
 #### Example `.env` File
 
@@ -71,14 +68,8 @@ STREAMER_USERNAME=your_favorite_streamer
 # GIF Configuration
 SEGMENT_DURATION=5
 FPS=10
-SCALE_WIDTH=420
-
-# PostgreSQL Database Configuration
-POSTGRES_URL="postgresql://your_user:your_password@postgres:5432/your_db_name?schema=public"
-POSTGRES_DATABASE=your_db_name
-POSTGRES_USER=your_user
-POSTGRES_PASSWORD=your_password
-```
+SCALE_WIDTH=480
+``
 
 ### Step 3: Start the Containers
 
@@ -99,7 +90,7 @@ docker-compose logs -f app
 ## Database Logging
 
 The bot logs events such as stream start/end, viewer count snapshots, post creation, updates, deletions, and error
-events into a PostgreSQL database. These logs can be queried directly for auditing and analysis.
+events into a SQLite database. These logs are stored in a persistent volume. SQLite was chosen for its simplicity and low resource requirements.
 
 ---
 

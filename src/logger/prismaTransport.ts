@@ -1,5 +1,5 @@
 import Transport from 'winston-transport';
-import {prisma} from "../repositories/currentPostRepository";
+import {prisma} from "../prisma/client";
 
 interface LogInfo {
     level: string;
@@ -17,15 +17,21 @@ export class PrismaTransport extends Transport {
             this.emit('logged', info);
         });
 
-        prisma.log.create({
-            data: {
-                level: info.level,
-                message: info.message,
-            },
-        }).catch((error: any) => {
-            console.error(`Failed to save log to database. Error: ${error.message}`);
-        }).finally(() => {
+        try {
+            prisma.log.create({
+                data: {
+                    level: info.level,
+                    message: info.message,
+                }
+            }).catch((error: any) => {
+                console.error(`Failed to save log to database. Error: ${error.message}`);
+            }).finally(() => {
+                callback();
+            });
+        } catch (error) {
+            console.error('Error in PrismaTransport:', error);
             callback();
-        });
+        }
     }
+
 }

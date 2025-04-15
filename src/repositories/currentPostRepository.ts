@@ -1,7 +1,5 @@
-import {PrismaClient} from "@prisma/client";
 import {logger} from "../logger/logger";
-
-export const prisma = new PrismaClient();
+import {prisma} from "../prisma/client";
 
 export async function getCurrentPostId(streamerUsername: string): Promise<number | null> {
     try {

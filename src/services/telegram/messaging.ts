@@ -2,7 +2,8 @@ import {getStreamData} from "../twitch/stream";
 import {captureStreamSegmentUsingStreamlink} from "../ffmpeg/capturing";
 import {logger} from "../../logger/logger";
 import {bot} from "./bot";
-import {prisma, truncateCurrentPosts} from "../../repositories/currentPostRepository";
+import {truncateCurrentPosts} from "../../repositories/currentPostRepository";
+import {prisma} from "../../prisma/client";
 
 function formatStreamDuration(startedAt: Date): string {
     const durationMs = Date.now() - startedAt.getTime();
