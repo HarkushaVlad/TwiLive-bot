@@ -73,28 +73,53 @@ export async function updateStreamPost(chatId: string, messageId: number, stream
             return false;
         }
 
-        logger.info(`Capturing new stream segment for ${streamerUsername}...`);
-        const gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
+        let gifPath: string;
+        try {
+            logger.info(`Capturing new stream segment for ${streamerUsername}...`);
+            gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
+        } catch (captureError) {
+            logger.error(`Failed to capture stream for ${streamerUsername}: ${captureError}`);
+            return await updatePostTextOnly(chatId, messageId, streamData, streamerUsername);
+        }
 
-        logger.info(`Updating stream post (ID: ${messageId}) in chat ${chatId}...`);
-        await bot.telegram.editMessageMedia(chatId, messageId, undefined, {
-            type: 'animation',
-            media: {source: gifPath},
-            caption: getMessage(streamData, streamerUsername),
-            parse_mode: 'HTML'
-        });
+        try {
+            logger.info(`Updating stream post (ID: ${messageId}) in chat ${chatId}...`);
+            await bot.telegram.editMessageMedia(chatId, messageId, undefined, {
+                type: 'animation',
+                media: {source: gifPath},
+                caption: getMessage(streamData, streamerUsername),
+                parse_mode: 'HTML'
+            });
 
-        logger.info(`Stream post (ID: ${messageId}) updated successfully.`);
-        return true;
+            logger.info(`Stream post (ID: ${messageId}) updated successfully.`);
+            return true;
+        } catch (telegramError) {
+            logger.error(`Failed to update Telegram message: ${telegramError}`);
+            return false;
+        }
     } catch (error: unknown) {
         if (error instanceof Error) {
-
             logger.error(`Failed to update stream post for ${streamerUsername}: ${error.message}`);
-            
         } else {
             logger.error(`Failed to update stream post for ${streamerUsername}: Unknown error`);
         }
+        return false;
+    }
+}
 
+async function updatePostTextOnly(chatId: string, messageId: number, streamData: any, streamerUsername: string): Promise<boolean> {
+    try {
+        await bot.telegram.editMessageCaption(
+            chatId,
+            messageId,
+            undefined,
+            getMessage(streamData, streamerUsername),
+            {parse_mode: 'HTML'}
+        );
+        logger.info(`Updated post text only for ${streamerUsername} (fallback method)`);
+        return true;
+    } catch (error) {
+        logger.error(`Failed to update post text: ${error}`);
         return false;
     }
 }
