@@ -20,7 +20,7 @@ export async function captureStreamSegmentUsingStreamlink(streamerUsername: stri
 
         const streamlinkProcess = spawn('streamlink', [
             `twitch.tv/${streamerUsername}`,
-            'best',
+            '480p',
             '--stdout',
             '--twitch-disable-ads',
         ]);
