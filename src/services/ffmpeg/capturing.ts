@@ -100,7 +100,7 @@ export async function captureStreamSegmentUsingStreamlink(
                 ffmpegProcess.stdin.on('error', (err: NodeJS.ErrnoException) => {
                     clearTimeout(timeout);
                     if (err.code === 'EPIPE') {
-                        logger.debug(`Ignoring EPIPE error for ${streamerUsername}`);
+                        // logger.debug(`Ignoring EPIPE error for ${streamerUsername}`);
                     } else {
                         logger.error(`Error in ffmpeg stdin for ${streamerUsername}: ${err.message}`);
                         reject(err);
