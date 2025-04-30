@@ -1,6 +1,8 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache ffmpeg streamlink
+RUN apk add --no-cache ffmpeg streamlink python3 py3-pip
+
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 WORKDIR /app
 
