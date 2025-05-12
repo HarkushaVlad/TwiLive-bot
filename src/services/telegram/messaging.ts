@@ -1,5 +1,5 @@
 import {getStreamData} from "../twitch/stream";
-import {captureStreamSegment} from "../ffmpeg/capturing";
+import {captureStreamSegmentUsingStreamlink} from "../ffmpeg/capturing";
 import {logger} from "../../logger/logger";
 import {bot} from "./bot";
 import {truncateCurrentPosts} from "../../repositories/currentPostRepository";
@@ -41,7 +41,7 @@ export async function sendStreamPost(channelId: string, streamerUsername: string
         }
 
         logger.info(`Capturing stream segment for ${streamerUsername}...`);
-        const gifPath = await captureStreamSegment(streamerUsername);
+        const gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
 
         logger.info(`Sending stream post to channel ${channelId}...`);
         const message = await bot.telegram.sendAnimation(
@@ -78,7 +78,7 @@ export async function updateStreamPost(chatId: string, messageId: number, stream
         let gifPath: string;
         try {
             logger.info(`Capturing new stream segment for ${streamerUsername}...`);
-            gifPath = await captureStreamSegment(streamerUsername);
+            gifPath = await captureStreamSegmentUsingStreamlink(streamerUsername);
         } catch (captureError) {
             logger.error(`Failed to capture stream for ${streamerUsername}: ${captureError}`);
             return await updatePostTextOnly(chatId, messageId, streamData, streamerUsername);
