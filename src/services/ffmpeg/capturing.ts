@@ -24,11 +24,11 @@ export async function captureStreamSegmentUsingStreamlink(
 
                 const segmentDuration = botConfig.SEGMENT_DURATION || 5;
                 const fps = botConfig.FPS || 10;
-                const scaleWidth = botConfig.SCALE_WIDTH || 420;
+                const scaleWidth = botConfig.SCALE_WIDTH || 480;
 
                 const streamlinkProcess = spawn('streamlink', [
                     `twitch.tv/${streamerUsername}`,
-                    `${scaleWidth}p`,
+                    `${scaleWidth}p30`,
                     '--stdout',
                     '--twitch-disable-ads',
                     '--retry-streams', '5',
