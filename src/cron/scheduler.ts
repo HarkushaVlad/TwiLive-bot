@@ -5,9 +5,18 @@ import {getStreamData} from "../services/twitch/stream";
 import {logger} from "../logger/logger";
 import {deleteCurrentPostId, getCurrentPostId, saveCurrentPostId} from "../repositories/currentPostRepository";
 
+let isProcessing = false;
+
 export const streamCheckJob = new CronJob(
     '0 * * * * *',
     async () => {
+        if (isProcessing) {
+            logger.warn("Stream check job skipped: previous execution still in progress.");
+            return;
+        }
+
+        isProcessing = true;
+
         try {
             logger.info("Checking stream status...");
 
@@ -40,6 +49,8 @@ export const streamCheckJob = new CronJob(
             }
         } catch (error) {
             logger.error(`Error during stream check: ${error}`);
+        } finally {
+            isProcessing = false;
         }
     },
     null,
