@@ -16,6 +16,7 @@ export async function captureStreamSegmentUsingStreamlink(
             return await new Promise((resolve, reject) => {
                 const outputDir = path.join(__dirname, '../../storage/tmp/');
                 const outputFile = path.join(outputDir, `${streamerUsername}.gif`);
+                let isFinished = false;
 
                 if (!fs.existsSync(outputDir)) {
                     fs.mkdirSync(outputDir, {recursive: true});
@@ -25,12 +26,12 @@ export async function captureStreamSegmentUsingStreamlink(
                 const segmentDuration = botConfig.SEGMENT_DURATION || 5;
                 const fps = botConfig.FPS || 10;
                 const scaleWidth = botConfig.SCALE_WIDTH || 480;
+                const streamSelector = `${scaleWidth}p30,${scaleWidth}p,720p60,720p,480p,360p,best,worst`;
 
                 const streamlinkProcess = spawn('streamlink', [
                     `twitch.tv/${streamerUsername}`,
-                    `${scaleWidth}p30`,
+                    streamSelector,
                     '--stdout',
-                    '--twitch-disable-ads',
                     '--retry-streams', '5',
                     '--retry-max', '3',
                     '--retry-open', '3',
@@ -45,16 +46,21 @@ export async function captureStreamSegmentUsingStreamlink(
                 ]);
 
                 const timeout = setTimeout(() => {
+                    if (isFinished) return;
+                    isFinished = true;
                     streamlinkProcess.kill();
                     ffmpegProcess.kill();
                     reject(new Error('Process timeout'));
-                }, 30000);
+                }, 60000);
 
                 streamlinkProcess.stdout.pipe(ffmpegProcess.stdin);
 
                 streamlinkProcess.on('error', (err) => {
+                    if (isFinished) return;
+                    isFinished = true;
                     clearTimeout(timeout);
                     logger.error(`Streamlink error for ${streamerUsername}: ${err.message}`);
+                    ffmpegProcess.kill();
                     reject(err);
                 });
 
@@ -66,8 +72,11 @@ export async function captureStreamSegmentUsingStreamlink(
                 });
 
                 ffmpegProcess.on('error', (err) => {
+                    if (isFinished) return;
+                    isFinished = true;
                     clearTimeout(timeout);
                     logger.error(`FFmpeg error for ${streamerUsername}: ${err.message}`);
+                    streamlinkProcess.kill();
                     reject(err);
                 });
 
@@ -79,30 +88,40 @@ export async function captureStreamSegmentUsingStreamlink(
                 });
 
                 ffmpegProcess.on('close', (code) => {
+                    if (isFinished) return;
+                    isFinished = true;
                     clearTimeout(timeout);
+                    
                     if (code === 0) {
                         logger.info(`Stream segment captured successfully for ${streamerUsername}: ${outputFile}`);
+                        streamlinkProcess.kill();
                         resolve(outputFile);
                     } else {
                         logger.error(`FFmpeg process for ${streamerUsername} exited with code ${code}`);
+                        streamlinkProcess.kill();
                         reject(new Error(`FFmpeg process exited with code ${code}`));
                     }
                 });
 
                 streamlinkProcess.on('close', (code) => {
-                    clearTimeout(timeout);
+                    if (isFinished) return;
+                    
                     if (code !== 0) {
+                        isFinished = true;
+                        clearTimeout(timeout);
                         logger.error(`Streamlink process for ${streamerUsername} exited with code ${code}`);
+                        ffmpegProcess.kill();
                         reject(new Error(`Streamlink process exited with code ${code}`));
                     }
                 });
 
                 ffmpegProcess.stdin.on('error', (err: NodeJS.ErrnoException) => {
-                    clearTimeout(timeout);
-                    if (err.code === 'EPIPE') {
-                        // logger.debug(`Ignoring EPIPE error for ${streamerUsername}`);
-                    } else {
+                    if (isFinished) return;
+                    if (err.code !== 'EPIPE') {
+                        isFinished = true;
+                        clearTimeout(timeout);
                         logger.error(`Error in ffmpeg stdin for ${streamerUsername}: ${err.message}`);
+                        streamlinkProcess.kill();
                         reject(err);
                     }
                 });
